@@ -3,8 +3,10 @@ import React, { useEffect, useState } from 'react'
 import Amplify, { API, graphqlOperation } from 'aws-amplify'
 import { createTodo } from './graphql/mutations'
 import { listTodos } from './graphql/queries'
-
 import awsExports from "./aws-exports";
+
+
+
 Amplify.configure(awsExports);
 
 const initialState = { name: '', description: '' }
@@ -24,7 +26,11 @@ const App = () => {
   async function fetchTodos() {
     try {
       const todoData = await API.graphql(graphqlOperation(listTodos))
-      const todos = todoData.data.listTodos.items
+      const todos = todoData.data.listTodos.items.sort(
+        function (a, b) {
+        return a.name - b.name;
+      });
+
       setTodos(todos)
     } catch (err) { console.log('error fetching todos') }
   }
@@ -54,12 +60,13 @@ const App = () => {
         onChange={event => setInput('description', event.target.value)}
         style={styles.input}
         value={formState.description}
-        placeholder="username"
+        placeholder="user name"
       />
       <button style={styles.button} onClick={addTodo}>Create Address</button>
       {
-        todos.map((todo, index) => (
-          <div key={todo.id ? todo.id : index} style={styles.todo}>
+            
+         todos.map((todo, index) => (
+          <div key={todo.name ? todo.name : index} style={styles.todo}>
             <p style={styles.todoName}>{todo.name}</p>
             <p style={styles.todoDescription}>{todo.description}</p>
           </div>
@@ -68,6 +75,8 @@ const App = () => {
     </div>
   )
 }
+
+
 
 const styles = {
   container: { width: 400, margin: '0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 20 },
